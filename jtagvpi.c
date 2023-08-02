@@ -13,9 +13,6 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 
-
-#define DEBUG
-
 #ifdef DEBUG
 #define DEBUG_FPRINTF(stream, ...)  ({\
   fprintf ( stream, "DEBUG(%s:%s:l%d)"\
@@ -257,9 +254,11 @@ static int do_scan(struct vpi_cmd * vpi, int * paddr, int * pdata, int * pop) {
 
   switch (state) {
     case SHIFT_DR:
+      #ifdef DEBUG
       DEBUG_PRINTF("SHIFT_DR, IR = ");
       fprintf_ir_name(stderr, ir);
       fprintf(stderr, "\n");
+      #endif
       if (ir == IR_IDCODE) {
         memcpy(vpi->buffer_in, vpi->buffer_out, vpi->length);
         word_to_array(vpi->buffer_in, idcode);
@@ -311,9 +310,11 @@ static int do_scan(struct vpi_cmd * vpi, int * paddr, int * pdata, int * pop) {
 }
 
 static void jtag_vpi_response(int fd) {
+  #ifdef DEBUG
   DEBUG_FPRINTF(stderr, "new jtag state=");
   fprintf_jtag_state(stderr, state);
   fprintf(stderr, "\n");
+  #endif
   if (vpi.cmd == CMD_SCAN_CHAIN || vpi.cmd == CMD_SCAN_CHAIN_FLIP_TMS) {
     #ifdef DEBUG
     {
@@ -379,13 +380,13 @@ static int jtag_vpi_request(int fd, int * addr, int * data, int * op) {
       fprintf_hex(stderr, vpi.buffer_out, vpi.length);
       fprintf(stderr, "\n");
     }
-    #endif
 
     DEBUG_FPRINTF(stderr, "jtag state=");
     fprintf_jtag_state(stderr, state);
     fprintf(stderr, ", ir=");
     fprintf_ir_name(stderr, ir);
     fprintf(stderr, "\n");
+    #endif
     switch ((uint32_t)vpi.cmd) {
     case CMD_RESET:
       DEBUG_PRINTF(": CMD_RESET\n");
@@ -399,12 +400,16 @@ static int jtag_vpi_request(int fd, int * addr, int * data, int * op) {
           for (i = 0; i < vpi.nb_bits; i++) {
               uint32_t mask = 1 << (i % 8);
               uint32_t tms = vpi.buffer_out[i / 8] & mask;
+              #ifdef DEBUG
               DEBUG_FPRINTF(stderr, "jtag state transition: ");
               fprintf_jtag_state(stderr, state);
+              #endif
               state = jtag_state_next[state][(tms == 0) ? 0 : 1];
+              #ifdef DEBUG
               fprintf(stderr, " -> ");
               fprintf_jtag_state(stderr, state);
               fprintf(stderr, "\n");
+              #endif
           }
       }
       break;
@@ -413,24 +418,32 @@ static int jtag_vpi_request(int fd, int * addr, int * data, int * op) {
       next_state = jtag_state_next[state][0];
       ret = do_scan(&vpi, addr, data, op);
       if (ret > 0) return ret;
+      #ifdef DEBUG
       DEBUG_FPRINTF(stderr, "jtag state transition: ");
       fprintf_jtag_state(stderr, state);
+      #endif
       state = next_state;
+      #ifdef DEBUG
       fprintf(stderr, " -> ");
       fprintf_jtag_state(stderr, state);
       fprintf(stderr, "\n");
+      #endif
       break;
     case CMD_SCAN_CHAIN_FLIP_TMS:
       DEBUG_PRINTF(": CMD_SCAN_CHAIN_FLIP_TMS\n");
       next_state = jtag_state_next[state][1];
       ret = do_scan(&vpi, addr, data, op);
       if (ret > 0) return ret;
+      #ifdef DEBUG
       DEBUG_FPRINTF(stderr, "jtag state transition: ");
       fprintf_jtag_state(stderr, state);
+      #endif
       state = next_state;
+      #ifdef DEBUG
       fprintf(stderr, " -> ");
       fprintf_jtag_state(stderr, state);
       fprintf(stderr, "\n");
+      #endif
       break;
     }
     jtag_vpi_response(fd);

@@ -1,5 +1,9 @@
 #CC = riscv64-unknown-elf-gcc
-CC = gcc
+
+CC ?= gcc
+ifdef DEBUG
+CFLAGS = -DDEBUG
+endif
 
 all: jtagvpi_to_fmemdmi
 
@@ -7,7 +11,7 @@ jtagvpi_to_fmemdmi: main.o fmemdmi.o jtagvpi.o
 	$(CC) $^ -o $@
 
 %.o: %.c
-	$(CC) -c $^ -o $@
+	$(CC) $(CFLAGS) -c $^ -o $@
 
 .PHONY: clean mrproper
 

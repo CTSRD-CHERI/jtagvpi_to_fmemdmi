@@ -10,8 +10,6 @@
 
 #include "fmemdmi.h"
 
-#define DEBUG
-
 #ifdef DEBUG
 #define DEBUG_FPRINTF(stream, ...)  ({\
   fprintf ( stream, "DEBUG(%s:%s:l%d)"\
