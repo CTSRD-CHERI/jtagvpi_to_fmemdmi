@@ -1,0 +1,10 @@
+= jtagvpi_to_fmemdmi
+Convert from vpi packets over jtag to dmi packets over fmem.
+
+[code,sh]
+------------
+Usage: ./jtagvpi_to_fmemdmi [-p JTAG_PORT] [-f DMI_FILENAME]
+------------
+
+* `JTAG_PORT` defaults to `5555`.
+* `DMI_FILENAME` defaults to `/dev/fmem_sys0_debug_unit`.
